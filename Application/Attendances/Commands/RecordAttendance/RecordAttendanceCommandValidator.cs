@@ -1,0 +1,14 @@
+using Application.Common.Validation;
+using FluentValidation;
+
+namespace Application.Attendances.Commands.RecordAttendance;
+
+public class RecordAttendanceCommandValidator : AbstractValidator<RecordAttendanceCommand>
+{
+      public RecordAttendanceCommandValidator()
+      {
+            RuleFor(x => x.SessionId).NotEmpty();
+            RuleFor(x => x.ChurchMemberId).NotEmpty();
+            RuleFor(x => x.AttendedAt).MustBeUtc();
+      }
+}

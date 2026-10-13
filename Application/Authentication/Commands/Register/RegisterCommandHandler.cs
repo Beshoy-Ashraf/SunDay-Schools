@@ -3,6 +3,7 @@ using MediatR;
 using Application.Common.Interfaces;
 using Application.Users.Dtos;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Application.Authentication.Dtos;
@@ -33,19 +34,14 @@ public class RegisterCommandHandler(
                 request.Email,
                 passwordHash,
                 request.DisplayName,
-                request.ProfilePictureUrl,
-                role: "User");
+                SystemRole.User);
 
             await context.UserRepository.AddAsync(user, cancellationToken);
 
             var (accessToken, expiresAt) = tokenService.GenerateAccessToken(user);
             var refreshToken = tokenService.GenerateRefreshToken();
 
-            user.RefreshTokens.Add(new Domain.Entities.RefreshToken
-            {
-                  Token = refreshToken,
-                  RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7)
-            });
+            user.AddRefreshToken(new Domain.Entities.RefreshToken(user.Id, refreshToken, DateTime.UtcNow.AddDays(7)));
 
             await context.Complete(cancellationToken);
 
@@ -53,6 +49,6 @@ public class RegisterCommandHandler(
                 accessToken,
                 refreshToken,
                 expiresAt,
-                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.Role));
+                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.Role.ToString()));
       }
 }

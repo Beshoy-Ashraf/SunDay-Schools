@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Domain.Exceptions;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,7 +46,7 @@ public class BaseRepository<T>(AppDbContext appDbContext) : IBaseRepository<T> w
             if (includes != null)
                   foreach (var include in includes)
                         query = query.Include(include);
-            var result = await query.FirstOrDefaultAsync(criteria, cancellationToken) ?? throw new KeyNotFoundException("No matching entity found in the database");
+            var result = await query.FirstOrDefaultAsync(criteria, cancellationToken) ?? throw new NotFoundException($"{typeof(T).Name} was not found.");
             return result;
 
       }
@@ -57,7 +58,7 @@ public class BaseRepository<T>(AppDbContext appDbContext) : IBaseRepository<T> w
 
       public async Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken)
       {
-            return await _dbContext.Set<T>().FindAsync(id, cancellationToken) ?? throw new KeyNotFoundException("No matching entity found in the database");
+            return await _dbContext.Set<T>().FindAsync([id], cancellationToken) ?? throw new NotFoundException(typeof(T).Name, id);
       }
 
       public Task<T> UpdateAsync(T entity)

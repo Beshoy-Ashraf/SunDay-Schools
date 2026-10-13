@@ -478,3 +478,5 @@ $RECYCLE.BIN/
 # Secrets safety net (user-secrets already keeps real values out of the repo)
 appsettings.Development.json
 appsettings.*.local.json
+# Serilog file output
+logs/

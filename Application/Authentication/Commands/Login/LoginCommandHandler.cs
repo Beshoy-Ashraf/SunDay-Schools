@@ -23,15 +23,11 @@ public class LoginCommandHandler(IUnitOfWork context, ITokenService tokenService
             var (accessToken, expiresAt) = tokenService.GenerateAccessToken(user);
             var refreshToken = tokenService.GenerateRefreshToken();
 
-            user.RefreshTokens.Add(new Domain.Entities.RefreshToken
-            {
-                  Token = refreshToken,
-                  RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7)
-            });
+            user.AddRefreshToken(new Domain.Entities.RefreshToken(user.Id, refreshToken, DateTime.UtcNow.AddDays(7)));
             await context.Complete(cancellationToken);
 
             return new AuthResponseDto(
                 accessToken, refreshToken, expiresAt,
-                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.Role));
+                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.Role.ToString()));
       }
 }

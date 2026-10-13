@@ -22,7 +22,7 @@ public class RefreshTokenCommandHandler(IUnitOfWork context, ITokenService token
             if (!Guid.TryParse(userIdClaim, out var userId))
                   throw new UnauthorizedException("Invalid access token.");
 
-            var user = await context.UserRepository.GetByIdAsync(userId, cancellationToken)
+            var user = await context.UserRepository.GetUserByUserId(userId, cancellationToken)
                 ?? throw new UnauthorizedException("User not found.");
 
             var refreshToken = user.RefreshTokens.FirstOrDefault(rt => rt.Token == request.RefreshToken)
@@ -31,16 +31,12 @@ public class RefreshTokenCommandHandler(IUnitOfWork context, ITokenService token
             if (!refreshToken.IsActive)
                   throw new UnauthorizedException("Refresh token is no longer active.");
 
-            refreshToken.IsRevoked = true;
+            refreshToken.Revoke();
 
             var (newAccessToken, expiresAt) = tokenService.GenerateAccessToken(user);
             var newRefreshTokenValue = tokenService.GenerateRefreshToken();
 
-            user.RefreshTokens.Add(new Domain.Entities.RefreshToken
-            {
-                  Token = newRefreshTokenValue,
-                  RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7)
-            });
+            user.AddRefreshToken(new Domain.Entities.RefreshToken(user.Id, newRefreshTokenValue, DateTime.UtcNow.AddDays(7)));
 
             await context.Complete(cancellationToken);
 
@@ -48,7 +44,7 @@ public class RefreshTokenCommandHandler(IUnitOfWork context, ITokenService token
                 newAccessToken,
                 newRefreshTokenValue,
                 expiresAt,
-                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.Role));
+                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.Role.ToString()));
       }
 
       private ClaimsPrincipal GetPrincipalOrThrow(string accessToken)

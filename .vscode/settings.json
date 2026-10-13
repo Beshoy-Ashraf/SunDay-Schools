@@ -9,10 +9,10 @@
                   "server": "localhost",
                   "port": 5432,
                   "driver": "PostgreSQL",
-                  "database": "APPDataBase",
+                  "name": "postgres",
                   "username": "postgres",
-                  "password": "1234",
-                  "name": "postgres"
+                  "database": "sundayschool",
+                  "password": "1234"
             }
       ]
 }

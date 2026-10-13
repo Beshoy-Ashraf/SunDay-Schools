@@ -7,9 +7,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(opt
 {
       public DbSet<User> Users { get; set; }
       public DbSet<RefreshToken> RefreshTokens { get; set; }
-
-
-
+      public DbSet<Eparchy> Eparchies { get; set; }
+      public DbSet<Church> Churches { get; set; }
+      public DbSet<ChurchMember> ChurchMembers { get; set; }
+      public DbSet<ChurchService> ChurchServices { get; set; }
+      public DbSet<ChurchServiceSession> ChurchServiceSessions { get; set; }
+      public DbSet<ChurchServiceAttendance> ChurchServiceAttendances { get; set; }
 
       protected override void OnModelCreating(ModelBuilder modelBuilder)
       {

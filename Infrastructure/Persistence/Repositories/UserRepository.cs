@@ -8,14 +8,17 @@ public class UserRepository(AppDbContext context) : BaseRepository<User>(context
 {
       private readonly AppDbContext _context = context;
 
+      // User stores email lowercased and username trimmed, so normalize lookups the same way.
       public async Task<User?> GetUserByEmail(string email, CancellationToken cancellationToken)
       {
+            email = email.Trim().ToLowerInvariant();
             return await _context.Users
                   .Include(u => u.RefreshTokens)
                   .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
       }
       public async Task<User?> GetUserByUsername(string username, CancellationToken cancellationToken)
       {
+            username = username.Trim();
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
       }
       public async Task<User?> GetUserByUserId(Guid id, CancellationToken cancellationToken)
