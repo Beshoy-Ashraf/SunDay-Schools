@@ -1,3 +1,4 @@
+using Application.Common.Authorization;
 using Application.Eparchies.Dtos;
 using Domain.Exceptions;
 using Domain.Interfaces;
@@ -5,10 +6,12 @@ using MediatR;
 
 namespace Application.Eparchies.Commands.RenameEparchy;
 
-public class RenameEparchyCommandHandler(IUnitOfWork context) : IRequestHandler<RenameEparchyCommand, EparchyDto>
+public class RenameEparchyCommandHandler(IUnitOfWork context, IChurchAuthorizationService authorization) : IRequestHandler<RenameEparchyCommand, EparchyDto>
 {
       public async Task<EparchyDto> Handle(RenameEparchyCommand request, CancellationToken cancellationToken)
       {
+            await authorization.EnsureSystemAdminAsync(cancellationToken);
+
             var eparchy = await context.EparchyRepository.GetByIdAsync(request.Id, cancellationToken);
 
             var existing = await context.EparchyRepository.GetByNameAsync(request.Name, cancellationToken);

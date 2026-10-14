@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Infrastructure.Identity;
+using Infrastructure.Persistence;
 using API.Middlewares;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
@@ -90,6 +91,8 @@ try
     });
 
     var app = builder.Build();
+
+    await app.Services.SeedSystemAdminsAsync(app.Configuration);
 
     app.UseSerilogRequestLogging(options =>
     {

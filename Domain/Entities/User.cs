@@ -40,5 +40,11 @@ public class User : BaseEntity
             MarkUpdated();
       }
 
+      public void ChangeSystemRole(SystemRole role)
+      {
+            Role = role;
+            MarkUpdated();
+      }
+
       public void AddRefreshToken(RefreshToken token) => _refreshTokens.Add(token);
 }

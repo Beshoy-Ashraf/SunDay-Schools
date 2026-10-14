@@ -1,4 +1,5 @@
 using System.Reflection;
+using Application.Common.Authorization;
 using Application.Common.Behaviors;
 using FluentValidation;
 using MediatR;
@@ -16,6 +17,7 @@ public static class DependencyInjection
             // Registration order is pipeline order: logging wraps validation so failures are timed too.
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidateBehavior<,>));
+            services.AddScoped<IChurchAuthorizationService, ChurchAuthorizationService>();
 
             return services;
       }

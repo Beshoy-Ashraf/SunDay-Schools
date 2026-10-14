@@ -1,3 +1,4 @@
+using Application.Common.Authorization;
 using Application.Churches.Dtos;
 using Domain.Entities;
 using Domain.Exceptions;
@@ -6,10 +7,12 @@ using MediatR;
 
 namespace Application.Churches.Commands.CreateChurch;
 
-public class CreateChurchCommandHandler(IUnitOfWork context) : IRequestHandler<CreateChurchCommand, ChurchDto>
+public class CreateChurchCommandHandler(IUnitOfWork context, IChurchAuthorizationService authorization) : IRequestHandler<CreateChurchCommand, ChurchDto>
 {
       public async Task<ChurchDto> Handle(CreateChurchCommand request, CancellationToken cancellationToken)
       {
+            await authorization.EnsureSystemAdminAsync(cancellationToken);
+
             await context.EparchyRepository.GetByIdAsync(request.EparchyId, cancellationToken);
 
             if (await context.ChurchRepository.NameExistsInEparchyAsync(request.EparchyId, request.Name, cancellationToken))

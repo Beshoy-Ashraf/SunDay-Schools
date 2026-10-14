@@ -1,13 +1,16 @@
+using Application.Common.Authorization;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using MediatR;
 
 namespace Application.Eparchies.Commands.DeleteEparchy;
 
-public class DeleteEparchyCommandHandler(IUnitOfWork context) : IRequestHandler<DeleteEparchyCommand>
+public class DeleteEparchyCommandHandler(IUnitOfWork context, IChurchAuthorizationService authorization) : IRequestHandler<DeleteEparchyCommand>
 {
       public async Task Handle(DeleteEparchyCommand request, CancellationToken cancellationToken)
       {
+            await authorization.EnsureSystemAdminAsync(cancellationToken);
+
             var eparchy = await context.EparchyRepository.GetWithChurchesAsync(request.Id, cancellationToken)
                 ?? throw new NotFoundException("Eparchy", request.Id);
 

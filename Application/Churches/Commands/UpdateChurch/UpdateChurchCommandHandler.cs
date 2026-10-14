@@ -1,3 +1,4 @@
+using Application.Common.Authorization;
 using Application.Churches.Dtos;
 using Domain.Exceptions;
 using Domain.Interfaces;
@@ -5,11 +6,12 @@ using MediatR;
 
 namespace Application.Churches.Commands.UpdateChurch;
 
-public class UpdateChurchCommandHandler(IUnitOfWork context) : IRequestHandler<UpdateChurchCommand, ChurchDto>
+public class UpdateChurchCommandHandler(IUnitOfWork context, IChurchAuthorizationService authorization) : IRequestHandler<UpdateChurchCommand, ChurchDto>
 {
       public async Task<ChurchDto> Handle(UpdateChurchCommand request, CancellationToken cancellationToken)
       {
             var church = await context.ChurchRepository.GetByIdAsync(request.Id, cancellationToken);
+            await authorization.EnsureChurchRoleAsync(church.Id, ChurchRoles.Managers, cancellationToken);
 
             var nameChanged = !string.Equals(church.Name, request.Name.Trim(), StringComparison.Ordinal);
             if (nameChanged && await context.ChurchRepository.NameExistsInEparchyAsync(church.EparchyId, request.Name, cancellationToken))
