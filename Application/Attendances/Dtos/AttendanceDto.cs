@@ -8,7 +8,9 @@ public record AttendanceDto(
     Guid ChurchMemberId,
     string? MemberDisplayName,
     Guid RecordedById,
-    DateTime AttendedAt)
+    DateTime AttendedAt,
+    int TotalPoints,
+    IReadOnlyList<ServantActivityRecordDto> ActivityRecords)
 {
       public static AttendanceDto FromEntity(ChurchServiceAttendance attendance) => new(
             attendance.Id,
@@ -16,5 +18,7 @@ public record AttendanceDto(
             attendance.ChurchMemberId,
             attendance.ChurchMember?.User?.DisplayName,
             attendance.RecordedById,
-            attendance.AttendedAt);
+            attendance.AttendedAt,
+            attendance.ActivityRecords.Sum(r => r.PointsEarned),
+            attendance.ActivityRecords.Select(ServantActivityRecordDto.FromEntity).ToList());
 }

@@ -1,6 +1,7 @@
 namespace API.Controllers;
 
 using Application.Attendances.Commands.RecordAttendance;
+using Application.Attendances.Queries.GetServantAttendanceBySession;
 using Application.Attendances.Queries.GetSessionAttendance;
 using Application.ChurchServiceSessions.Commands.DeleteSession;
 using Application.ChurchServiceSessions.Commands.RescheduleSession;
@@ -44,6 +45,10 @@ public class SessionsController(ISender mediator) : ControllerBase
     [HttpPost("{id:guid}/attendance")]
     public async Task<IActionResult> RecordAttendance(Guid id, RecordAttendanceRequest request, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new RecordAttendanceCommand(id, request.ChurchMemberId, request.AttendedAt), cancellationToken));
+
+    [HttpGet("{id:guid}/servant-attendance")]
+    public async Task<IActionResult> GetServantAttendance(Guid id, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetServantAttendanceBySessionQuery(id), cancellationToken));
 }
 
 public record RescheduleSessionRequest(DateTime StartTime, DateTime EndTime);

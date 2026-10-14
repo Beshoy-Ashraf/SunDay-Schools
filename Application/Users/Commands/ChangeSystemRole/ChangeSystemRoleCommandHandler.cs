@@ -21,6 +21,6 @@ public class ChangeSystemRoleCommandHandler(IUnitOfWork context, IChurchAuthoriz
             user.ChangeSystemRole(request.Role);
             await context.Complete(cancellationToken);
 
-            return new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.Role.ToString());
+            return new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.NationalId, user.ParentId, user.Role.ToString());
       }
 }

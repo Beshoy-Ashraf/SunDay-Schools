@@ -5,6 +5,10 @@ using Application.ChurchServices.Commands.DeleteChurchService;
 using Application.ChurchServices.Commands.UpdateChurchService;
 using Application.ChurchServices.Queries.GetChurchServiceById;
 using Application.ChurchServiceSessions.Queries.GetSessionsByService;
+using Application.ChurchServiceMembers.Commands.AssignServiceMember;
+using Application.ChurchServiceMembers.Commands.RemoveServiceMember;
+using Application.ChurchServiceMembers.Queries.GetServiceMembers;
+using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,6 +44,22 @@ public class ChurchServicesController(ISender mediator) : ControllerBase
         await mediator.Send(new DeleteChurchServiceCommand(id), cancellationToken);
         return NoContent();
     }
+
+    [HttpGet("{id:guid}/members")]
+    public async Task<IActionResult> GetMembers(Guid id, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetServiceMembersQuery(id), cancellationToken));
+
+    [HttpPost("{id:guid}/members")]
+    public async Task<IActionResult> AssignMember(Guid id, AssignServiceMemberRequest request, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new AssignServiceMemberCommand(id, request.ChurchMemberId, request.Role), cancellationToken));
+
+    [HttpDelete("{id:guid}/members/{memberId:guid}")]
+    public async Task<IActionResult> RemoveMember(Guid id, Guid memberId, CancellationToken cancellationToken)
+    {
+        await mediator.Send(new RemoveServiceMemberCommand(id, memberId), cancellationToken);
+        return NoContent();
+    }
 }
 
 public record UpdateChurchServiceRequest(string Name, string? Description, DateTime StartTime, DateTime EndTime);
+public record AssignServiceMemberRequest(Guid ChurchMemberId, ChurchServiceRole Role);

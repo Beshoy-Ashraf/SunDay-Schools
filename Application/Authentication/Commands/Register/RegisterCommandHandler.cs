@@ -27,6 +27,13 @@ public class RegisterCommandHandler(
             if (existingUsername is not null)
                   throw new ConflictException($"Username '{request.Username}' is already taken.");
 
+            if (request.ParentId is not null)
+            {
+                  var parent = await context.UserRepository.GetUserByUserId(request.ParentId.Value, cancellationToken);
+                  if (parent is null)
+                        throw new NotFoundException("User", request.ParentId.Value);
+            }
+
             var passwordHash = hasher.Hash(request.Password);
 
             var user = new User(
@@ -34,7 +41,9 @@ public class RegisterCommandHandler(
                 request.Email,
                 passwordHash,
                 request.DisplayName,
-                SystemRole.User);
+                SystemRole.User,
+                request.NationalId,
+                request.ParentId);
 
             await context.UserRepository.AddAsync(user, cancellationToken);
 
@@ -49,6 +58,6 @@ public class RegisterCommandHandler(
                 accessToken,
                 refreshToken,
                 expiresAt,
-                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.Role.ToString()));
+                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.NationalId, user.ParentId, user.Role.ToString()));
       }
 }

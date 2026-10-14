@@ -28,6 +28,6 @@ public class LoginCommandHandler(IUnitOfWork context, ITokenService tokenService
 
             return new AuthResponseDto(
                 accessToken, refreshToken, expiresAt,
-                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.Role.ToString()));
+                new UserDto(user.Id, user.Username, user.Email, user.DisplayName, user.NationalId, user.ParentId, user.Role.ToString()));
       }
 }

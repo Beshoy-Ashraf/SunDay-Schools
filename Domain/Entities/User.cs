@@ -12,6 +12,9 @@ public class User : BaseEntity
       public string Email { get; private set; } = null!;
       public string PasswordHash { get; private set; } = null!;
       public string DisplayName { get; private set; } = null!;
+      public string? NationalId { get; private set; }
+      public Guid? ParentId { get; private set; }
+      public User? Parent { get; private set; }
       public SystemRole Role { get; private set; }   // Admin / User  (غير ChurchMemberRole)
 
       public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
@@ -19,7 +22,7 @@ public class User : BaseEntity
 
       private User() { }
 
-      public User(string username, string email, string passwordHash, string displayName, SystemRole role)
+      public User(string username, string email, string passwordHash, string displayName, SystemRole role, string? nationalId = null, Guid? parentId = null)
       {
             ArgumentException.ThrowIfNullOrWhiteSpace(username);
             ArgumentException.ThrowIfNullOrWhiteSpace(email);
@@ -30,6 +33,8 @@ public class User : BaseEntity
             Email = email.Trim().ToLowerInvariant();
             PasswordHash = passwordHash;
             DisplayName = displayName.Trim();
+            NationalId = nationalId?.Trim();
+            ParentId = parentId;
             Role = role;
       }
 
@@ -43,6 +48,20 @@ public class User : BaseEntity
       public void ChangeSystemRole(SystemRole role)
       {
             Role = role;
+            MarkUpdated();
+      }
+
+      public void UpdateProfile(string username, string email, string displayName, string? nationalId, Guid? parentId)
+      {
+            ArgumentException.ThrowIfNullOrWhiteSpace(username);
+            ArgumentException.ThrowIfNullOrWhiteSpace(email);
+            ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
+
+            Username = username.Trim();
+            Email = email.Trim().ToLowerInvariant();
+            DisplayName = displayName.Trim();
+            NationalId = nationalId?.Trim();
+            ParentId = parentId;
             MarkUpdated();
       }
 

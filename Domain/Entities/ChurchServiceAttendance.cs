@@ -4,6 +4,8 @@ namespace Domain.Entities;
 
 public class ChurchServiceAttendance : BaseEntity
 {
+      private readonly List<ServantActivityRecord> _activityRecords = [];
+
       public Guid ChurchServiceSessionId { get; private set; }
       public ChurchServiceSession ChurchServiceSession { get; private set; } = null!;
 
@@ -14,6 +16,8 @@ public class ChurchServiceAttendance : BaseEntity
       public ChurchMember RecordedBy { get; private set; } = null!;
 
       public DateTime AttendedAt { get; private set; }
+
+      public IReadOnlyCollection<ServantActivityRecord> ActivityRecords => _activityRecords.AsReadOnly();
 
       private ChurchServiceAttendance() { }
 
@@ -28,5 +32,13 @@ public class ChurchServiceAttendance : BaseEntity
             RecordedBy = recordedBy;
             RecordedById = recordedBy.Id;
             AttendedAt = attendedAt;
+      }
+
+      /// <summary>Records a yes/no answer for a servant activity type, awarding points if answered true.</summary>
+      public ServantActivityRecord RecordActivity(ActivityType activityType, bool answered)
+      {
+            var record = new ServantActivityRecord(this, activityType, answered);
+            _activityRecords.Add(record);
+            return record;
       }
 }

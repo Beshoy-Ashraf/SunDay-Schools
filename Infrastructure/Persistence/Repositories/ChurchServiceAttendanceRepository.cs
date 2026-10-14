@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,18 @@ public class ChurchServiceAttendanceRepository(AppDbContext context) : BaseRepos
       {
             return await _dbContext.ChurchServiceAttendances
                   .Include(a => a.ChurchMember).ThenInclude(m => m.User)
+                  .Include(a => a.ActivityRecords).ThenInclude(r => r.ActivityType)
                   .Where(a => a.ChurchServiceSessionId == sessionId)
+                  .OrderBy(a => a.AttendedAt)
+                  .ToListAsync(cancellationToken);
+      }
+
+      public async Task<IReadOnlyList<ChurchServiceAttendance>> GetServantsBySessionAsync(Guid sessionId, CancellationToken cancellationToken)
+      {
+            return await _dbContext.ChurchServiceAttendances
+                  .Include(a => a.ChurchMember).ThenInclude(m => m.User)
+                  .Include(a => a.ActivityRecords).ThenInclude(r => r.ActivityType)
+                  .Where(a => a.ChurchServiceSessionId == sessionId && a.ChurchMember.Role != ChurchMemberRole.Member)
                   .OrderBy(a => a.AttendedAt)
                   .ToListAsync(cancellationToken);
       }
@@ -19,6 +31,7 @@ public class ChurchServiceAttendanceRepository(AppDbContext context) : BaseRepos
       {
             var query = _dbContext.ChurchServiceAttendances
                   .Include(a => a.ChurchServiceSession).ThenInclude(s => s.ChurchService)
+                  .Include(a => a.ActivityRecords).ThenInclude(r => r.ActivityType)
                   .Where(a => a.ChurchMemberId == churchMemberId);
 
             if (from is not null)
@@ -27,5 +40,10 @@ public class ChurchServiceAttendanceRepository(AppDbContext context) : BaseRepos
                   query = query.Where(a => a.ChurchServiceSession.StartTime < to);
 
             return await query.OrderByDescending(a => a.ChurchServiceSession.StartTime).ToListAsync(cancellationToken);
+      }
+
+      public async Task AddActivityRecordAsync(ServantActivityRecord record, CancellationToken cancellationToken)
+      {
+            await _dbContext.ServantActivityRecords.AddAsync(record, cancellationToken);
       }
 }

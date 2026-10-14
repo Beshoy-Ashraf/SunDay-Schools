@@ -15,6 +15,8 @@ public class UnitOfWork : IUnitOfWork
       public IChurchMemberRepository ChurchMemberRepository { get; private set; }
       public IChurchServiceRepository ChurchServiceRepository { get; private set; }
       public IChurchServiceSessionRepository ChurchServiceSessionRepository { get; private set; }
+      public IChurchServiceMemberRepository ChurchServiceMemberRepository { get; private set; }
+      public IActivityTypeRepository ActivityTypeRepository { get; private set; }
       public IChurchServiceAttendanceRepository ChurchServiceAttendanceRepository { get; private set; }
 
       public UnitOfWork(AppDbContext dBContext)
@@ -27,6 +29,8 @@ public class UnitOfWork : IUnitOfWork
             ChurchMemberRepository = new ChurchMemberRepository(_dbContext);
             ChurchServiceRepository = new ChurchServiceRepository(_dbContext);
             ChurchServiceSessionRepository = new ChurchServiceSessionRepository(_dbContext);
+            ChurchServiceMemberRepository = new ChurchServiceMemberRepository(_dbContext);
+            ActivityTypeRepository = new ActivityTypeRepository(_dbContext);
             ChurchServiceAttendanceRepository = new ChurchServiceAttendanceRepository(_dbContext);
       }
       public async Task<int> Complete(CancellationToken cancellationToken)
