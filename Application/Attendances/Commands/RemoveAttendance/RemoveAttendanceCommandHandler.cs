@@ -10,11 +10,10 @@ public class RemoveAttendanceCommandHandler(IUnitOfWork context, IChurchAuthoriz
       public async Task Handle(RemoveAttendanceCommand request, CancellationToken cancellationToken)
       {
             var attendance = await context.ChurchServiceAttendanceRepository.FindAsync(
-                  a => a.Id == request.Id, cancellationToken, ["ChurchServiceSession.ChurchService"]);
+                  a => a.Id == request.Id, cancellationToken, ["ChurchService"]);
 
-            // Same rule as recording: only a servant of the church may change attendance.
             await authorization.EnsureChurchRoleAsync(
-                  attendance.ChurchServiceSession.ChurchService.ChurchId, ChurchRoles.Servants, cancellationToken);
+                  attendance.ChurchService.ChurchId, ChurchRoles.Servants, cancellationToken);
 
             attendance.SoftDelete();
             await context.Complete(cancellationToken);

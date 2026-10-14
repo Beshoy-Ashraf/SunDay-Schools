@@ -12,14 +12,12 @@ public class ChurchServiceAttendanceConfiguration : BaseEntityConfiguration<Chur
 
             builder.Property(a => a.AttendedAt).IsRequired();
 
-            // A member is recorded at most once per session.
-            builder.HasIndex(a => new { a.ChurchServiceSessionId, a.ChurchMemberId })
-                  .IsUnique()
-                  .HasFilter("\"DeletedAt\" IS NULL");
+            // A member is recorded at most once per day per service (enforced at application level).
+            builder.HasIndex(a => new { a.ChurchServiceId, a.ChurchMemberId, a.AttendedAt });
 
-            builder.HasOne(a => a.ChurchServiceSession)
-                  .WithMany(s => s.Attendances)
-                  .HasForeignKey(a => a.ChurchServiceSessionId)
+            builder.HasOne(a => a.ChurchService)
+                  .WithMany()
+                  .HasForeignKey(a => a.ChurchServiceId)
                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(a => a.ChurchMember)

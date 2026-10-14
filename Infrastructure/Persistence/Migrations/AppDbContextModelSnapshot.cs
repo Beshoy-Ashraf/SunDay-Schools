@@ -22,56 +22,6 @@ namespace Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.ActivityType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("AppliesTo")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<Guid>("ChurchServiceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("MaxPerMonth")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("Points")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChurchServiceId", "Code")
-                        .IsUnique()
-                        .HasFilter("\"DeletedAt\" IS NULL");
-
-                    b.ToTable("ActivityTypes", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Entities.Church", b =>
                 {
                     b.Property<Guid>("Id")
@@ -217,7 +167,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<Guid>("ChurchMemberId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ChurchServiceSessionId")
+                    b.Property<Guid>("ChurchServiceId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -238,9 +188,7 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("RecordedById");
 
-                    b.HasIndex("ChurchServiceSessionId", "ChurchMemberId")
-                        .IsUnique()
-                        .HasFilter("\"DeletedAt\" IS NULL");
+                    b.HasIndex("ChurchServiceId", "ChurchMemberId", "AttendedAt");
 
                     b.ToTable("ChurchServiceAttendances", (string)null);
                 });
@@ -279,39 +227,6 @@ namespace Infrastructure.Persistence.Migrations
                         .HasFilter("\"DeletedAt\" IS NULL");
 
                     b.ToTable("ChurchServiceMembers", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.ChurchServiceSession", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ChurchServiceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChurchServiceId", "StartTime");
-
-                    b.ToTable("ChurchServiceSessions", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_ChurchServiceSessions_EndTime_After_StartTime", "\"EndTime\" > \"StartTime\"");
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Eparchy", b =>
@@ -372,43 +287,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.ServantActivityRecord", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ActivityTypeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("Answered")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("ChurchServiceAttendanceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("PointsEarned")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActivityTypeId");
-
-                    b.HasIndex("ChurchServiceAttendanceId", "ActivityTypeId")
-                        .IsUnique()
-                        .HasFilter("\"DeletedAt\" IS NULL");
-
-                    b.ToTable("ServantActivityRecords", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -476,17 +354,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.ActivityType", b =>
-                {
-                    b.HasOne("Domain.Entities.ChurchService", "ChurchService")
-                        .WithMany("ActivityTypes")
-                        .HasForeignKey("ChurchServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ChurchService");
-                });
-
             modelBuilder.Entity("Domain.Entities.Church", b =>
                 {
                     b.HasOne("Domain.Entities.Eparchy", "Eparchy")
@@ -536,9 +403,9 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.ChurchServiceSession", "ChurchServiceSession")
-                        .WithMany("Attendances")
-                        .HasForeignKey("ChurchServiceSessionId")
+                    b.HasOne("Domain.Entities.ChurchService", "ChurchService")
+                        .WithMany()
+                        .HasForeignKey("ChurchServiceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -550,7 +417,7 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Navigation("ChurchMember");
 
-                    b.Navigation("ChurchServiceSession");
+                    b.Navigation("ChurchService");
 
                     b.Navigation("RecordedBy");
                 });
@@ -574,17 +441,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("ChurchService");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ChurchServiceSession", b =>
-                {
-                    b.HasOne("Domain.Entities.ChurchService", "ChurchService")
-                        .WithMany("Sessions")
-                        .HasForeignKey("ChurchServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ChurchService");
-                });
-
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
@@ -594,25 +450,6 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ServantActivityRecord", b =>
-                {
-                    b.HasOne("Domain.Entities.ActivityType", "ActivityType")
-                        .WithMany()
-                        .HasForeignKey("ActivityTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.ChurchServiceAttendance", "ChurchServiceAttendance")
-                        .WithMany("ActivityRecords")
-                        .HasForeignKey("ChurchServiceAttendanceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ActivityType");
-
-                    b.Navigation("ChurchServiceAttendance");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -634,21 +471,7 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.ChurchService", b =>
                 {
-                    b.Navigation("ActivityTypes");
-
                     b.Navigation("ServiceMembers");
-
-                    b.Navigation("Sessions");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ChurchServiceAttendance", b =>
-                {
-                    b.Navigation("ActivityRecords");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ChurchServiceSession", b =>
-                {
-                    b.Navigation("Attendances");
                 });
 
             modelBuilder.Entity("Domain.Entities.Eparchy", b =>

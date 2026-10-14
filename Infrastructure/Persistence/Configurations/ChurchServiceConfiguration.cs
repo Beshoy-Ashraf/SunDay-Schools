@@ -23,6 +23,5 @@ public class ChurchServiceConfiguration : BaseEntityConfiguration<ChurchService>
                   .HasForeignKey(s => s.ChurchId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Navigation(s => s.Sessions).UsePropertyAccessMode(PropertyAccessMode.Field);
       }
 }

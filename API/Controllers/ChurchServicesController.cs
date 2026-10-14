@@ -1,10 +1,12 @@
 namespace API.Controllers;
 
+using Application.Attendances.Commands.RecordAttendance;
+using Application.Attendances.Queries.GetServiceAttendance;
+using Application.Attendances.Queries.GetServantAttendanceByService;
 using Application.ChurchServices.Commands.CreateChurchService;
 using Application.ChurchServices.Commands.DeleteChurchService;
 using Application.ChurchServices.Commands.UpdateChurchService;
 using Application.ChurchServices.Queries.GetChurchServiceById;
-using Application.ChurchServiceSessions.Queries.GetSessionsByService;
 using Application.ChurchServiceMembers.Commands.AssignServiceMember;
 using Application.ChurchServiceMembers.Commands.RemoveServiceMember;
 using Application.ChurchServiceMembers.Queries.GetServiceMembers;
@@ -21,10 +23,6 @@ public class ChurchServicesController(ISender mediator) : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new GetChurchServiceByIdQuery(id), cancellationToken));
-
-    [HttpGet("{id:guid}/sessions")]
-    public async Task<IActionResult> GetSessions(Guid id, DateTime? from, DateTime? to, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new GetSessionsByServiceQuery(id, from, to), cancellationToken));
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateChurchServiceCommand command, CancellationToken cancellationToken)
@@ -59,7 +57,20 @@ public class ChurchServicesController(ISender mediator) : ControllerBase
         await mediator.Send(new RemoveServiceMemberCommand(id, memberId), cancellationToken);
         return NoContent();
     }
+
+    [HttpGet("{id:guid}/attendance")]
+    public async Task<IActionResult> GetAttendance(Guid id, DateTime? from, DateTime? to, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetServiceAttendanceQuery(id, from, to), cancellationToken));
+
+    [HttpPost("{id:guid}/attendance")]
+    public async Task<IActionResult> RecordAttendance(Guid id, RecordAttendanceRequest request, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new RecordAttendanceCommand(id, request.ChurchMemberId, request.AttendedAt), cancellationToken));
+
+    [HttpGet("{id:guid}/servant-attendance")]
+    public async Task<IActionResult> GetServantAttendance(Guid id, DateTime? from, DateTime? to, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetServantAttendanceByServiceQuery(id, from, to), cancellationToken));
 }
 
 public record UpdateChurchServiceRequest(string Name, string? Description, DateTime StartTime, DateTime EndTime);
 public record AssignServiceMemberRequest(Guid ChurchMemberId, ChurchServiceRole Role);
+public record RecordAttendanceRequest(Guid ChurchMemberId, DateTime? AttendedAt);

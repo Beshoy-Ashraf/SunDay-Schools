@@ -24,10 +24,6 @@ public static class ChurchRoles
       /// <summary>See the church's members, services and sessions.</summary>
       public static readonly IReadOnlyCollection<ChurchMemberRole> AnyMember = Enum.GetValues<ChurchMemberRole>();
 
-      /// <summary>Create activity types and set point values. ServiceHead is included per the plan.</summary>
-      public static readonly IReadOnlyCollection<ChurchMemberRole> ActivityTypeManagers =
-            [ChurchMemberRole.Admin, ChurchMemberRole.Priest, ChurchMemberRole.ChurchServantHead, ChurchMemberRole.ServiceHead];
-
       /// <summary>View servant attendance. Restricted to leadership only.</summary>
       public static readonly IReadOnlyCollection<ChurchMemberRole> ServantAttendanceViewers =
             [ChurchMemberRole.Admin, ChurchMemberRole.Priest, ChurchMemberRole.ChurchServantHead];

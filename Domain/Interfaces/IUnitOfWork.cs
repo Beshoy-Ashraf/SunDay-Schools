@@ -10,9 +10,7 @@ public interface IUnitOfWork : IDisposable
       IChurchRepository ChurchRepository { get; }
       IChurchMemberRepository ChurchMemberRepository { get; }
       IChurchServiceRepository ChurchServiceRepository { get; }
-      IChurchServiceSessionRepository ChurchServiceSessionRepository { get; }
       IChurchServiceMemberRepository ChurchServiceMemberRepository { get; }
-      IActivityTypeRepository ActivityTypeRepository { get; }
       IChurchServiceAttendanceRepository ChurchServiceAttendanceRepository { get; }
       Task<int> Complete(CancellationToken cancellationToken);
 }

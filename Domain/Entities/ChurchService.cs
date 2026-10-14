@@ -7,9 +7,7 @@ namespace Domain.Entities;
 
 public class ChurchService : BaseEntity
 {
-      private readonly List<ChurchServiceSession> _sessions = [];
       private readonly List<ChurchServiceMember> _serviceMembers = [];
-      private readonly List<ActivityType> _activityTypes = [];
 
       public string Name { get; private set; } = null!;
       public string? Description { get; private set; }
@@ -19,9 +17,7 @@ public class ChurchService : BaseEntity
       public Guid ChurchId { get; private set; }
       public Church Church { get; private set; } = null!;
 
-      public IReadOnlyCollection<ChurchServiceSession> Sessions => _sessions.AsReadOnly();
       public IReadOnlyCollection<ChurchServiceMember> ServiceMembers => _serviceMembers.AsReadOnly();
-      public IReadOnlyCollection<ActivityType> ActivityTypes => _activityTypes.AsReadOnly();
 
       private ChurchService() { }
 
@@ -47,13 +43,6 @@ public class ChurchService : BaseEntity
             MarkUpdated();
       }
 
-      public ChurchServiceSession ScheduleSession(DateTime startTime, DateTime endTime)
-      {
-            var session = new ChurchServiceSession(this, startTime, endTime);
-            _sessions.Add(session);
-            return session;
-      }
-
       public ChurchServiceMember AssignMember(ChurchMember member, ChurchServiceRole role)
       {
             if (!member.IsActive)
@@ -64,5 +53,27 @@ public class ChurchService : BaseEntity
             var assignment = new ChurchServiceMember(this, member, role);
             _serviceMembers.Add(assignment);
             return assignment;
+      }
+
+      /// <summary>
+      /// Creates an attendance record. Enforces that both parties are active members of this service's church
+      /// and that the recorder is a servant role.
+      /// Duplicate check (same member + same day) must be done by the caller before invoking this.
+      /// </summary>
+      public ChurchServiceAttendance RecordAttendance(ChurchMember member, ChurchMember recordedBy, DateTime? attendedAt = null)
+      {
+            ArgumentNullException.ThrowIfNull(member);
+            ArgumentNullException.ThrowIfNull(recordedBy);
+
+            if (!member.IsActive || member.ChurchId != ChurchId)
+                  throw new BadRequestException("Member is not an active member of this service's church.");
+
+            if (!recordedBy.IsActive || recordedBy.ChurchId != ChurchId)
+                  throw new ForbiddenException("Recorder is not an active member of this service's church.");
+
+            if (recordedBy.Role == ChurchMemberRole.Member)
+                  throw new ForbiddenException("Only servants can record attendance.");
+
+            return new ChurchServiceAttendance(this, member, recordedBy, attendedAt ?? DateTime.UtcNow);
       }
 }
